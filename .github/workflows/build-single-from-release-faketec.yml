@@ -10,7 +10,7 @@ on:
         type: string
       # 手动指定 patches 子文件夹，留空=使用根目录补丁
       patch_subdir:
-        description: ''
+        description: 'patches 子文件夹名（只填子目录名，不要填 patches）'
         required: false
         default: ''
 
@@ -25,7 +25,7 @@ jobs:
 
       # 固定使用指定的官方 commit
       - name: 设置固定 commit
-        run: echo "FIXED_COMMIT=d18f3f7a658817b35a3ab746d8522c1136890785" >> "$GITHUB_ENV"
+        run: echo "FIXED_REF=v2.7.15.567b8ea" >> "$GITHUB_ENV"
 
       # 拉取固定 commit 的官方源码
       - name: Checkout 官方固件源码
@@ -34,7 +34,7 @@ jobs:
           repository: meshtastic/firmware
           path: firmware
           submodules: recursive
-          ref: ${{ env.FIXED_COMMIT }}
+          ref: ${{ env.FIXED_REF }}
 
       # 根据输入选择补丁文件夹
       - name: 应用自定义硬件变种与补丁

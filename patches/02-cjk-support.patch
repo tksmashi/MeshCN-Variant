@@ -1,8 +1,8 @@
 diff --git a/src/graphics/Screen.cpp b/src/graphics/Screen.cpp
-index 0012aeb5d03..a7d840b7a08 100644
+index 86599d5..4b5eed2 100644
 --- a/src/graphics/Screen.cpp
 +++ b/src/graphics/Screen.cpp
-@@ -90,6 +90,12 @@ uint16_t TFT_MESH = COLOR565(0x67, 0xEA, 0x94);
+@@ -88,6 +88,12 @@ extern uint16_t TFT_MESH;
  #include "input/cardKbI2cImpl.h"
  #endif
  
@@ -15,33 +15,49 @@ index 0012aeb5d03..a7d840b7a08 100644
  using namespace meshtastic; /** @todo remove */
  
  namespace graphics
-@@ -643,7 +649,17 @@ void Screen::setup()
-     }
- #endif
+@@ -572,6 +578,16 @@ void Screen::setup()
+     // === Enable UTF-8 to display mapping ===
+     dispdev->setFontTableLookupFunction(customFontTableLookup);
  
--    // Generate device ID from MAC address
 +#ifdef OLED_CJK
-+    #if OLED_CJK_SIZE==12
++    #if OLED_CJK_SIZE == 12
 +    dispdev->setUtf8Font(&utf8_12x12_font);
-+    #elif OLED_CJK_SIZE==16
++    #elif OLED_CJK_SIZE == 16
 +    dispdev->setUtf8Font(&utf8_16x16_font);
-+    #elif OLED_CJK_SIZE==24
++    #elif OLED_CJK_SIZE == 24
 +    dispdev->setUtf8Font(&utf8_24x24_font);
 +    #endif
 +#endif
 +
-+    // === Generate device ID from MAC address ===
-     uint8_t dmac[6];
-     getMacAddr(dmac);
-     snprintf(screen->ourId, sizeof(screen->ourId), "%02x%02x", dmac[4], dmac[5]);
+ #ifdef USERPREFS_OEM_TEXT
+     logo_timeout *= 2; // Give more time for branded boot logos
+ #endif
 diff --git a/src/graphics/draw/MessageRenderer.cpp b/src/graphics/draw/MessageRenderer.cpp
-index 09b798e0643..98dba1d14cb 100644
+index da6ec7a..c91d65b 100644
 --- a/src/graphics/draw/MessageRenderer.cpp
 +++ b/src/graphics/draw/MessageRenderer.cpp
-@@ -813,7 +813,7 @@ std::vector<std::string> generateLines(OLEDDisplay *display, const char *headerS
-         } else {
-             word += ch;
-             std::string test = line + word;
+@@ -137,7 +137,7 @@ void drawStringWithEmotes(OLEDDisplay *display, int x, int y, const std::string
+                 display->drawString(cursorX + 1, fontY, textChunk.c_str());
+             }
+             display->drawString(cursorX, fontY, textChunk.c_str());
+-#if defined(OLED_UA) || defined(OLED_RU)
++#if defined(OLED_UA) || defined(OLED_RU) || defined(OLED_CJK)
+             cursorX += display->getStringWidth(textChunk.c_str(), textChunk.length(), true);
+ #else
+             cursorX += display->getStringWidth(textChunk.c_str());
+@@ -159,7 +159,7 @@ void drawStringWithEmotes(OLEDDisplay *display, int x, int y, const std::string
+                 display->drawString(cursorX + 1, fontY, remaining.c_str());
+             }
+             display->drawString(cursorX, fontY, remaining.c_str());
+-#if defined(OLED_UA) || defined(OLED_RU)
++#if defined(OLED_UA) || defined(OLED_RU) || defined(OLED_CJK)
+             cursorX += display->getStringWidth(remaining.c_str(), remaining.length(), true);
+ #else
+             cursorX += display->getStringWidth(remaining.c_str());
+@@ -457,7 +457,7 @@ std::vector<std::string> generateLines(OLEDDisplay *display, const char *headerS
+ // LOG_INFO("Char: '%c' (0x%02X)", ch, (unsigned char)ch);
+ // LOG_INFO("Current String: %s", test.c_str());
+ // Note: there are boolean comparison uint16 (getStringWidth) with int (textWidth), hope textWidth is always positive :)
 -#if defined(OLED_UA) || defined(OLED_RU)
 +#if defined(OLED_UA) || defined(OLED_RU) || defined(OLED_CJK)
              uint16_t strWidth = display->getStringWidth(test.c_str(), test.length(), true);
